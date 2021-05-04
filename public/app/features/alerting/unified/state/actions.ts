@@ -336,11 +336,12 @@ interface UpdateAlertManagerConfigActionOptions {
   newConfig: AlertManagerCortexConfig;
   successMessage?: string; // show toast on success
   redirectPath?: string; // where to redirect on success
+  refetch?: boolean; // refetch config on success
 }
 
 export const updateAlertManagerConfigAction = createAsyncThunk<void, UpdateAlertManagerConfigActionOptions, {}>(
   'unifiedalerting/updateAMConfig',
-  ({ alertManagerSourceName, oldConfig, newConfig, successMessage, redirectPath }): Promise<void> =>
+  ({ alertManagerSourceName, oldConfig, newConfig, successMessage, redirectPath, refetch }, thunkAPI): Promise<void> =>
     withSerializedError(
       (async () => {
         const latestConfig = await fetchAlertManagerConfig(alertManagerSourceName);
@@ -352,6 +353,9 @@ export const updateAlertManagerConfigAction = createAsyncThunk<void, UpdateAlert
         await updateAlertmanagerConfig(alertManagerSourceName, newConfig);
         if (successMessage) {
           appEvents.emit(AppEvents.alertSuccess, [successMessage]);
+        }
+        if (refetch) {
+          await thunkAPI.dispatch(fetchAlertManagerConfigAction(alertManagerSourceName));
         }
         if (redirectPath) {
           locationService.push(makeAMLink(redirectPath, alertManagerSourceName));
