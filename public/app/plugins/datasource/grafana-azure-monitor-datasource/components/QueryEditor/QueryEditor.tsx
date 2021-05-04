@@ -1,4 +1,4 @@
-import { Alert, VerticalGroup } from '@grafana/ui';
+import { Alert } from '@grafana/ui';
 import React from 'react';
 import Datasource from '../../datasource';
 import { AzureMonitorQuery, AzureQueryType, AzureMonitorOption, AzureMonitorErrorish } from '../../types';
@@ -6,6 +6,7 @@ import MetricsQueryEditor from '../MetricsQueryEditor';
 import QueryTypeField from './QueryTypeField';
 import useLastError from '../../utils/useLastError';
 import LogsQueryEditor from '../LogsQueryEditor';
+import InsightsAnalyticsEditor from '../InsightsAnalyticsEditor';
 
 interface BaseQueryEditorProps {
   query: AzureMonitorQuery;
@@ -26,22 +27,23 @@ const QueryEditor: React.FC<BaseQueryEditorProps> = ({ query, datasource, onChan
     <div data-testid="azure-monitor-query-editor">
       <QueryTypeField query={query} onQueryChange={onChange} />
 
-      <VerticalGroup>
-        <EditorForQueryType
-          subscriptionId={subscriptionId}
-          query={query}
-          datasource={datasource}
-          onChange={onChange}
-          variableOptionGroup={variableOptionGroup}
-          setError={setError}
-        />
+      <EditorForQueryType
+        subscriptionId={subscriptionId}
+        query={query}
+        datasource={datasource}
+        onChange={onChange}
+        variableOptionGroup={variableOptionGroup}
+        setError={setError}
+      />
 
-        {errorMessage && (
+      {errorMessage && (
+        <>
+          <br />
           <Alert severity="error" title="An error occurred while requesting metadata from Azure Monitor">
             {errorMessage}
           </Alert>
-        )}
-      </VerticalGroup>
+        </>
+      )}
     </div>
   );
 };
@@ -83,6 +85,9 @@ const EditorForQueryType: React.FC<EditorForQueryTypeProps> = ({
           setError={setError}
         />
       );
+
+    case AzureQueryType.InsightsAnalytics:
+      return <InsightsAnalyticsEditor query={query} />;
   }
 
   return null;
